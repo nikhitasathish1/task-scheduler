@@ -57,28 +57,7 @@ git clone <repository-url>
 cd task-orchestrator
 ```
 
-### 2. Environment Configuration
-
-Update `config/config.yaml` with your settings:
-
-```yaml
-# Database Configuration
-database:
-  host: "postgres"
-  port: 5433
-  user: "postgres"
-  password: "password123"
-  database: "task_scheduler"
-
-# Email Configuration (Optional)
-email:
-  smtp_server: "smtp.gmail.com"
-  smtp_port: 587
-  email: "your-email@gmail.com"
-  password: "your-app-password"
-```
-
-### 3. Start with Docker Compose
+### 2. Start with Docker Compose
 
 ```bash
 docker-compose up -d
@@ -91,7 +70,7 @@ This will start:
 - Prometheus (port 9090)
 - Grafana (port 3000)
 
-### 4. Access the Services
+### 3. Access the Services
 
 - **API Documentation**: http://localhost:8080/docs
 - **Task API**: http://localhost:8080/api/v1/
@@ -101,7 +80,7 @@ This will start:
 
 ## API Usage
 
-### Create a Task
+### Create an Email Task
 
 ```bash
 curl -X POST "http://localhost:8080/api/v1/tasks" \
@@ -145,7 +124,7 @@ curl -X POST "http://localhost:8080/api/v1/tasks" \
     "name": "Daily Report",
     "task_type": "email",
     "priority": "medium",
-    "scheduled_at": "2024-12-25T09:00:00",
+    "scheduled_at": "2025-08-25T09:00:00",
     "email_task": {
       "to_addresses": ["admin@company.com"],
       "subject": "Daily Report",
@@ -189,160 +168,8 @@ cd src
 python main.py
 ```
 
-## Advanced Features
 
-### Custom Task Functions
-
-```python
-from task_orchestrator import TaskOrchestrator
-
-orchestrator = TaskOrchestrator(config)
-
-# Register custom function
-def process_data(data_list):
-    return {"processed": len(data_list), "sum": sum(data_list)}
-
-orchestrator.register_task_function('process_data', process_data)
-
-# Create task with custom function
-await orchestrator.create_task(
-    name="Process User Data",
-    task_type="data_processing",
-    function_name="process_data",
-    args=[[1, 2, 3, 4, 5]]
-)
-```
-
-### Scheduled Tasks with Cron
-
-```python
-from scheduler import AdvancedScheduler
-
-scheduler = AdvancedScheduler(orchestrator)
-await scheduler.start()
-
-# Daily at 9 AM
-scheduler.schedule_cron_task(
-    task_name="Daily Backup",
-    task_type="data_processing",
-    cron_expression="0 9 * * *",
-    task_data={
-        "function_name": "backup_data",
-        "kwargs": {"source": "/data", "dest": "/backup"}
-    }
-)
-```
-
-### Task Dependencies
-
-```python
-# Create dependent tasks
-parent_task_id = await orchestrator.create_task(
-    name="Data Extract",
-    task_type="data_processing",
-    function_name="extract_data"
-)
-
-child_task_id = await orchestrator.create_task(
-    name="Data Transform",
-    task_type="data_processing",
-    function_name="transform_data",
-    dependencies=[parent_task_id]  # Will wait for parent to complete
-)
-```
-
-## Monitoring
-
-### Prometheus Metrics
-
-Available metrics:
-- `task_orchestrator_tasks_total` - Total tasks created
-- `task_orchestrator_tasks_completed` - Completed tasks
-- `task_orchestrator_tasks_failed` - Failed tasks
-- `task_orchestrator_tasks_running` - Currently running tasks
-- `task_orchestrator_emails_sent` - Emails sent successfully
-- `task_orchestrator_api_calls_made` - API calls made
-- `task_orchestrator_execution_time_seconds` - Task execution time
-- `task_orchestrator_queue_size` - Current queue size
-
-### Grafana Dashboard
-
-The included Grafana dashboard provides:
-- Task status overview
-- Execution time trends
-- Email and API call metrics
-- Queue size monitoring
-- System health indicators
-
-## Configuration Reference
-
-### Database Settings
-
-```yaml
-database:
-  host: "postgres"           # Database host
-  port: 5433                # Database port
-  user: "postgres"          # Database user
-  password: "password123"   # Database password
-  database: "task_scheduler" # Database name
-  pool_size: 20             # Connection pool size
-  max_overflow: 10          # Max pool overflow
-```
-
-### Worker Settings
-
-```yaml
-workers:
-  count: 5                  # Number of worker threads
-  max_queue_size: 10000     # Maximum queue size
-  task_timeout: 300         # Default task timeout (seconds)
-```
-
-### Email Settings
-
-```yaml
-email:
-  smtp_server: "smtp.gmail.com"  # SMTP server
-  smtp_port: 587                 # SMTP port
-  email: "your-email@gmail.com"  # SMTP username
-  password: "app-password"       # SMTP password (use app password for Gmail)
-```
-
-## Production Deployment
-
-### Environment Variables
-
-Override config values using environment variables:
-
-```bash
-export DATABASE_HOST=your-db-host
-export REDIS_HOST=your-redis-host
-export WORKER_COUNT=10
-export METRICS_PORT=8000
-```
-
-### Security Considerations
-
-1. **Database Security**:
-   - Use strong passwords
-   - Enable SSL connections
-   - Restrict database access
-
-2. **Email Security**:
-   - Use app passwords instead of account passwords
-   - Configure proper SMTP authentication
-
-3. **API Security**:
-   - Implement authentication middleware
-   - Use HTTPS in production
-   - Configure proper CORS origins
-
-4. **Redis Security**:
-   - Enable authentication
-   - Use TLS for connections
-   - Restrict network access
-
-## Testing
+### Testing
 
 ```bash
 # Run tests
@@ -352,28 +179,6 @@ pytest tests/
 pytest --cov=src tests/
 ```
 
-## Troubleshooting
-
-### Common Issues
-
-1. **Database Connection Failed**:
-   - Check PostgreSQL is running
-   - Verify connection settings
-   - Ensure database exists
-
-2. **Redis Connection Failed**:
-   - Check Redis is running
-   - Verify Redis URL configuration
-
-3. **Email Tasks Failing**:
-   - Check SMTP settings
-   - Verify email credentials
-   - Check firewall/network restrictions
-
-4. **Tasks Not Processing**:
-   - Check worker threads are running
-   - Verify task queue status
-   - Check for task dependencies
 
 ### Logs
 
